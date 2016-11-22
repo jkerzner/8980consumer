@@ -17,7 +17,10 @@ package edu.umn.cs.cs8980;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -40,7 +43,12 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 public class TestStream1 {
 
 	public static void main(String[] args) throws Exception {
-		// Setup the streaming execution environment
+
+                Properties prop = new Properties();
+                InputStream propStream = new FileInputStream("src/main/resources/config.properties");
+                prop.load(propStream);
+
+                // Setup the streaming execution environment
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
                 
                 // Setup the time characteristic - either processing time or event time.
@@ -48,7 +56,7 @@ public class TestStream1 {
                 
                 // get events as they arrive
                 DataStreamSource<String> sourceStream = env
-                    .socketTextStream("127.0.1.1", 5555);
+                    .socketTextStream(prop.getProperty("generatorHost"), Integer.parseInt(prop.getProperty("generatorPort")));
                 
                 // the transformed stream contains watermarks
                 DataStream<Tuple2<Long, Integer>> transformedStream = sourceStream
